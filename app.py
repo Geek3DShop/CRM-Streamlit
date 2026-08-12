@@ -86,7 +86,7 @@ with st.expander("➕ Adicionar Venda"):
             Receita_Bruta = Valor_da_peça
             Custos = 0.0
             Receita_Líquida = Receita_Bruta - Custos  
-                                                         #     Receita_Bruta	 =  st.number_input("Receita_Bruta", min_value=0.0, step=0.01) 
+
             nova_linha = {
                 "Data": Data,
                 "Ação": Ação,
@@ -110,22 +110,51 @@ with st.expander("➕ Adicionar Venda"):
 
             st.success(f"Venda de {Nome} adicionada com sucesso!")
             st.rerun()
-        #     Custos	 = st.number_input("Custos", min_value=0.0, step=0.01)
 
-        #     Receita_Líquida = st.number_input("Receita_Líquida", min_value=0.0, step=0.01)
+with st.expander("💰 Custos, Vendas e Receitas"):
 
-        #     confirmar = st.form_submit_button("Adicionar venda")
+    colunas_numericas = [
+        "Valor da peça",
+        "Receita Bruta",
+        "Custos",
+        "Receita Líquida"
+    ]
 
-        # if confirmar:
+    for coluna in colunas_numericas:
+        if coluna in df.columns:
+            df[coluna] = pd.to_numeric(
+                df[coluna],
+                errors="coerce"
+            ).fillna(0)
 
-        #     df = pd.read_excel(path)
-        #     nova_linha = { "Data": Data, "Ação": Ação, "Status": Status, 
-        #                 "Nome": Nome, "Sobrenome": Sobrenome, 
-        #                 "Contato": Contato, "Peça": Peça, 
-        #                 "Estágio_da_peça": Estágio_da_peça, 
-        #                 "Valor_da_peça": Valor_da_peça, 
-        #                 "Receita_Bruta": Receita_Bruta, 
-        #                 "Custos": Custos, "Receita_Líquida": Receita_Líquida }
-        #     df = pd.concat([df, pd.DataFrame([nova_linha])], ignore_index=True)
+    total_vendas =len(df)
+    receita_bruta = df["Receita Bruta"].sum()
 
-        #     st.success("Venda adicionada com sucesso!")
+    custos = df["Custos"].sum()
+
+    receita_liquida = receita_bruta - custos
+
+    if receita_bruta > 0:
+        margem_lucro = (
+            receita_liquida / receita_bruta
+        ) * 100
+    else: 
+        margem_lucro = 0
+    
+    col1, col2, col3, col4, col5 = st.columns(5)
+
+    with col1:
+        st.metric("🛒 Vendas", total_vendas)
+    
+    with col1:
+            st.metric("💵 Receita Bruta", f"R$ {receita_bruta:,.2f}")
+    with col1:
+            st.metric("💸 Custos",f"R$ {custos:,.2f}")
+    with col1:
+            st.metric("💰 Receita Líquida",f"R$ {receita_liquida:,.2f}")
+    with col1:
+            st.metric("📈 Margem", f"R$ {margem_lucro:,.2f}")
+
+    st.divider()
+
+      
