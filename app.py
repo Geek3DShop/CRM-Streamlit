@@ -22,7 +22,7 @@ import pandas as pd
 from dotenv import load_dotenv
 
 load_dotenv()
-path = "/workspaces/CRM-Streamlit/CRM - Vendas Impressão 3D.xlsx"
+path = os.getenv("CRM_PATH")
 
 st.set_page_config(page_title="CRM Geek 3D Shop",  page_icon="💰", layout="wide")
 
