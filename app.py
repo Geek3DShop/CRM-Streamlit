@@ -22,7 +22,7 @@ import pandas as pd
 from dotenv import load_dotenv
 
 load_dotenv()
-path = os.getenv("CRM_PATH")
+path = "/workspaces/CRM-Streamlit/CRM - Vendas Impressão 3D.xlsx"
 
 st.set_page_config(page_title="CRM Geek 3D Shop",  page_icon="💰", layout="wide")
 
@@ -53,7 +53,59 @@ def salvar_dados(df):
     df.to_excel(path, index=False)
 
 df = carrega_dados()
-   
+colunas_numericas = [
+        "Valor da peça",
+        "Receita Bruta",
+        "Custos",
+        "Receita Líquida"
+    ]
+
+for coluna in colunas_numericas:
+    if coluna in df.columns:
+        df[coluna] = pd.to_numeric(
+                df[coluna],
+                errors="coerce"
+            ).fillna(0)
+
+total_vendas =len(df)
+receita_bruta = df["Receita Bruta"].sum()
+
+custos = df["Custos"].sum()
+
+receita_liquida = receita_bruta - custos
+
+if receita_bruta > 0:
+     margem_lucro = (
+            receita_liquida / receita_bruta
+    ) * 100
+else: 
+    margem_lucro = 0
+    
+col_vazio, col1, col2, col3, col4, col5 = st.columns( [8, 2, 2, 2, 2, 2])
+
+with col1:
+        st.metric("🛒 Vendas", total_vendas)
+    
+with col2:
+            st.metric("💵 Receita Bruta", f"R$ {receita_bruta:,.2f}")
+with col3:
+            st.metric("💸 Custos",f"R$ {custos:,.2f}")
+with col4:
+            st.metric("💰 Receita Líquida",f"R$ {receita_liquida:,.2f}")
+with col5:
+            st.metric("📈 Margem", f"R$ {margem_lucro:,.2f}")
+
+st.divider()
+st.subheader("📋 Vendas cadastradas")
+
+if len(df) > 0:
+     st.dataframe(
+        df, use_container_width=True, hide_index=True
+     )
+else:
+     st.info(
+          "Nehuma venda cadastra ainda."
+     )
 with st.expander("➕ Adicionar Venda"):
         with st.form("nova_venda"):
             st.subheader("Dados da venda")
@@ -111,72 +163,31 @@ with st.expander("➕ Adicionar Venda"):
             st.success(f"Venda de {Nome} adicionada com sucesso!")
             st.rerun()
 
-with st.expander("💰 Vendas e Receitas"):
-
-    colunas_numericas = [
-        "Valor da peça",
-        "Receita Bruta",
-        "Custos",
-        "Receita Líquida"
-    ]
-
-    for coluna in colunas_numericas:
-        if coluna in df.columns:
-            df[coluna] = pd.to_numeric(
-                df[coluna],
-                errors="coerce"
-            ).fillna(0)
-
-    total_vendas =len(df)
-    receita_bruta = df["Receita Bruta"].sum()
-
-    custos = df["Custos"].sum()
-
-    receita_liquida = receita_bruta - custos
-
-    if receita_bruta > 0:
-        margem_lucro = (
-            receita_liquida / receita_bruta
-        ) * 100
-    else: 
-        margem_lucro = 0
-    
-    col1, col2, col3, col4, col5 = st.columns(5)
-
-    with col1:
-        st.metric("🛒 Vendas", total_vendas)
-    
-    with col1:
-            st.metric("💵 Receita Bruta", f"R$ {receita_bruta:,.2f}")
-    with col1:
-            st.metric("💸 Custos",f"R$ {custos:,.2f}")
-    with col1:
-            st.metric("💰 Receita Líquida",f"R$ {receita_liquida:,.2f}")
-    with col1:
-            st.metric("📈 Margem", f"R$ {margem_lucro:,.2f}")
-
-    st.divider()
 
 with st.expander("Custos"):
     st.subheader("💸 Adicionar custo")
 
     if len(df) > 0:
-         with st.form("novo_custo"):
-              col1, col2, col3 = st.columns(3)
 
-              with col1:
-                   venda_id = st.selectbox(
+        with st.form("novo_custo"):
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                venda_id = st.selectbox(
                     "Selecionar venda",
-                    options=df.index, format_func=lambda x:(
-                         f"{x + 1} - "
-                         f"{df.loc[x, 'Nome']}"
-                         f"{df.loc[x, 'Sobrenome']} -"
-                         f"{df.loc[x, 'Peça']}"
+                    options=df.index,
+                    format_func=lambda x: (
+                        f"{x + 1} - "
+                        f"{df.loc[x, 'Nome']} "
+                        f"{df.loc[x, 'Sobrenome']} - "
+                        f"{df.loc[x, 'Peça']}"
                     )
-                   )
-              with col2:
-                   tipo_custo = st.selectbox(
-                        "Tipo de custo",[
+                )
+
+            with col2:
+                tipo_custo = st.selectbox(
+                    "Tipo de custo",
+                    [
                         "Filamento",
                         "Energia",
                         "Embalagem",
@@ -185,45 +196,41 @@ with st.expander("Custos"):
                         "Pintura",
                         "Manutenção",
                         "Outro"
-                        ]
-                   )
-              with col3:
-                   valor_custo = st.number_input(
-                        "Valot do custo(R$)",
-                        min_value=0.0,
-                        step=0.01,
-                        format="%.2f"
-                   )
-              adicionar_custo = st.form_submit_button(
-                     "💾 Adicionar custo",
-                     use_container_width=True
+                    ]
                 )
-         if adicionar_custo:
-              df.loc[venda_id, "Custos"] +=valor_custo
 
-              df.loc[venda_id, "Receita Líquida"] =(
-                   df.loc[venda_id, "Receita Bruta"] 
-                   - df.loc[venda_id, "Custos"]
-              )
-              salvar_dados(df)
+            with col3:
+                valor_custo = st.number_input(
+                    "Valor do custo (R$)",
+                    min_value=0.0,
+                    step=0.01,
+                    format="%.2f"
+                )
 
-              st.success( f"✅ Custo de R$ {valor_custo:,.2f} "
-                f"adicionado à venda.")
-              st.rerun()
-         else:
-              st.warning(
-                   "Adicione uma venda antes de cadastrar custos"
-              )
-            
-st.divider()
+            adicionar_custo = st.form_submit_button(
+                "💾 Adicionar custo",
+                use_container_width=True
+            )
 
-st.subheader("📋 Vendas cadastradas")
+        if adicionar_custo:
+            df.loc[venda_id, "Custos"] += valor_custo
 
-if len(df) > 0:
-     st.dataframe(
-        df, use_container_width=True, hide_index=True
-     )
-else:
-     st.info(
-          "Nehuma venda cadastra ainda."
-     )
+            df.loc[venda_id, "Receita Líquida"] = (
+                df.loc[venda_id, "Receita Bruta"]
+                - df.loc[venda_id, "Custos"]
+            )
+
+            salvar_dados(df)
+
+            st.success(
+                f"✅ Custo de R$ {valor_custo:,.2f} "
+                f"adicionado à venda."
+            )
+
+            st.rerun()
+
+    else:
+        st.warning(
+            "Adicione uma venda antes de cadastrar custos"
+        )
+
