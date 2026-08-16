@@ -111,7 +111,7 @@ with st.expander("➕ Adicionar Venda"):
             st.success(f"Venda de {Nome} adicionada com sucesso!")
             st.rerun()
 
-with st.expander("💰 Custos, Vendas e Receitas"):
+with st.expander("💰 Vendas e Receitas"):
 
     colunas_numericas = [
         "Valor da peça",
@@ -157,4 +157,73 @@ with st.expander("💰 Custos, Vendas e Receitas"):
 
     st.divider()
 
-      
+with st.expander("Custos"):
+    st.subheader("💸 Adicionar custo")
+
+    if len(df) > 0:
+         with st.form("novo_custo"):
+              col1, col2, col3 = st.columns(3)
+
+              with col1:
+                   venda_id = st.selectbox(
+                    "Selecionar venda",
+                    options=df.index, format_func=lambda x:(
+                         f"{x + 1} - "
+                         f"{df.loc[x, 'Nome']}"
+                         f"{df.loc[x, 'Sobrenome']} -"
+                         f"{df.loc[x, 'Peça']}"
+                    )
+                   )
+              with col2:
+                   tipo_custo = st.selectbox(
+                        "Tipo de custo",[
+                        "Filamento",
+                        "Energia",
+                        "Embalagem",
+                        "Frete",
+                        "Mão de obra",
+                        "Pintura",
+                        "Manutenção",
+                        "Outro"
+                        ]
+                   )
+              with col3:
+                   valor_custo = st.number_input(
+                        "Valot do custo(R$)",
+                        min_value=0.0,
+                        step=0.01,
+                        format="%.2f"
+                   )
+              adicionar_custo = st.form_submit_button(
+                     "💾 Adicionar custo",
+                     use_container_width=True
+                )
+         if adicionar_custo:
+              df.loc[venda_id, "Custos"] +=valor_custo
+
+              df.loc[venda_id, "Receita Líquida"] =(
+                   df.loc[venda_id, "Receita Bruta"] 
+                   - df.loc[venda_id, "Custos"]
+              )
+              salvar_dados(df)
+
+              st.success( f"✅ Custo de R$ {valor_custo:,.2f} "
+                f"adicionado à venda.")
+              st.rerun()
+         else:
+              st.warning(
+                   "Adicione uma venda antes de cadastrar custos"
+              )
+            
+st.divider()
+
+st.subheader("📋 Vendas cadastradas")
+
+if len(df) > 0:
+     st.dataframe(
+        df, use_container_width=True, hide_index=True
+     )
+else:
+     st.info(
+          "Nehuma venda cadastra ainda."
+     )
