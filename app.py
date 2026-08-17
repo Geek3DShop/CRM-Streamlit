@@ -1,21 +1,3 @@
-# import os
-# import streamlit as st
-# import pandas as pd
-# from dotenv import load_dotenv
-
-# load_dotenv()
-
-# st.set_page_config(page_title="CRM Geek 3D Shop", layout="wide")
-
-# st.title("CRM Geek 3D Shop")
-
-# path = os.getenv("CRM_PATH")
-# df = pd.read_excel(path)
-# df = df.dropna(axis=1, how="all")
-
-# st.dataframe(df, width="stretch")
-
-
 import os
 import streamlit as st
 import pandas as pd
@@ -81,7 +63,7 @@ if receita_bruta > 0:
 else: 
     margem_lucro = 0
     
-col_vazio, col1, col2, col3, col4, col5 = st.columns( [8, 2, 2, 2, 2, 2])
+col1, col2, col3, col4, col5 = st.columns( [2, 2, 2, 2, 2])
 
 with col1:
         st.metric("🛒 Vendas", total_vendas)
@@ -96,16 +78,7 @@ with col5:
             st.metric("📈 Margem", f"R$ {margem_lucro:,.2f}")
 
 st.divider()
-st.subheader("📋 Vendas cadastradas")
 
-if len(df) > 0:
-     st.dataframe(
-        df, use_container_width=True, hide_index=True
-     )
-else:
-     st.info(
-          "Nehuma venda cadastra ainda."
-     )
 with st.expander("➕ Adicionar Venda"):
         with st.form("nova_venda"):
             st.subheader("Dados da venda")
@@ -162,7 +135,6 @@ with st.expander("➕ Adicionar Venda"):
 
             st.success(f"Venda de {Nome} adicionada com sucesso!")
             st.rerun()
-
 
 with st.expander("Custos"):
     st.subheader("💸 Adicionar custo")
@@ -234,3 +206,13 @@ with st.expander("Custos"):
             "Adicione uma venda antes de cadastrar custos"
         )
 
+st.subheader("📋 Vendas cadastradas")
+
+if len(df) > 0:
+     st.dataframe(
+        df, use_container_width=True, hide_index=True
+     )
+else:
+     st.info(
+          "Nehuma venda cadastra ainda."
+     )
