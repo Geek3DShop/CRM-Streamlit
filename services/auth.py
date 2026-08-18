@@ -3,8 +3,8 @@ import streamlit as st
 from dotenv import load_dotenv
 
 load_dotenv()
-CRM_USER = os.getenv("CRM_USER")
-CRM_PASSWORD = os.getenv("CRM_PASSWORD")
+ADM_USER = os.getenv("ADM_USER")
+ADM_PASSWORD = os.getenv("ADM_PASSWORD")
 
 def login():
     st.title("🔐 CRM Geek 3D Shop")
@@ -13,14 +13,14 @@ def login():
     password = st.text_input("Senha", type="password")
 
     if st.button("Entrar", use_container_width=True):
-        if username == CRM_USER and password == CRM_PASSWORD:
+        if username == ADM_USER and password == ADM_PASSWORD:
             st.session_state["authenticated"] = True
             st.rerun()
         else:
             st.error("Usuário ou senha incorretos.")
 
 def authenticate(username, password):
-    return username == CRM_USER and password == CRM_PASSWORD
+    return username == ADM_USER and password == ADM_PASSWORD
 
 def is_authenticated():
     return st.session_state.get("authenticated", False)
