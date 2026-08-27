@@ -1,6 +1,7 @@
 import os
 import streamlit as st
 from dotenv import load_dotenv
+from argon2 import PasswordHasher
 
 load_dotenv()
 ADM_USER = os.getenv("ADM_USER")
