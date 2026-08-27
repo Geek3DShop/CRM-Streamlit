@@ -2,7 +2,7 @@ import os
 import streamlit as st
 import pandas as pd
 from dotenv import load_dotenv
-from services.auth import login, is_authenticated, logout
+from services.auth import is_authenticated, logout
 from pages.login import login
 
 load_dotenv()
@@ -15,6 +15,16 @@ st.set_page_config(
     layout="wide"
 )
 if not is_authenticated():
+    st.markdown(
+        """
+        <style>
+        section[data-testid="stSidebar"] {
+            display: none;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
     login()
     st.stop()
 
