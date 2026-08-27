@@ -15,6 +15,16 @@ st.set_page_config(
     layout="wide"
 )
 if not is_authenticated():
+    st.markdown(
+        """
+        <style>
+        section[data-testid="stSidebar"] {
+            display: none;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
     login()
     st.stop()
 
