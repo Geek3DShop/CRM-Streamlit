@@ -9,6 +9,27 @@ load_dotenv()
 clientes_path = os.getenv("CLIENTES_PATH")
 custos_path = os.getenv("CUSTOS_PATH")
 
+st.set_page_config(
+    page_title="CRM Geek 3D Shop",
+    page_icon="💰",
+    layout="wide"
+)
+
+if not is_authenticated():
+    st.markdown(
+        """
+        <style>
+        section[data-testid="stSidebar"] {
+            display: none;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    login()
+    st.stop()
+
+
 def formatar_reais(valor):
     return (
         f"R$ {valor:,.2f}"
@@ -17,8 +38,10 @@ def formatar_reais(valor):
         .replace("X", ".")
     )
 
+
 def salvar_dados(df):
     df.to_excel(clientes_path, index=False)
+
 
 def carrega_dados():
     if os.path.exists(clientes_path):
@@ -40,10 +63,6 @@ def carrega_dados():
         ])
     return df
 
-def salvar_dados(df):
-    df.to_excel(clientes_path, index=False)
-
-st.set_page_config(page_title="CRM Geek 3D Shop", page_icon="💰", layout="wide")
 
 if not clientes_path:
     st.error("A variável CLIENTES_PATH não está definida no arquivo .env.")
@@ -51,6 +70,11 @@ if not clientes_path:
 
 st.title("CRM Geek 3D Shop")
 st.caption("Controle de clientes, vendas, custos e lucro")
+
+with st.sidebar:
+    st.write("### 👤 Usuário autenticado")
+    if st.button("🚪 Sair", use_container_width=True):
+        logout()
 
 df = carrega_dados()
 
