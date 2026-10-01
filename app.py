@@ -2,13 +2,23 @@ import os
 import streamlit as st
 import pandas as pd
 from dotenv import load_dotenv
+from services.auth import is_authenticated, logout
+from pages.login import login
 
 load_dotenv()
 clientes_path = os.getenv("CLIENTES_PATH")
 custos_path = os.getenv("CUSTOS_PATH")
 
 def formatar_reais(valor):
-    return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return (
+        f"R$ {valor:,.2f}"
+        .replace(",", "X")
+        .replace(".", ",")
+        .replace("X", ".")
+    )
+
+def salvar_dados(df):
+    df.to_excel(clientes_path, index=False)
 
 def carrega_dados():
     if os.path.exists(clientes_path):

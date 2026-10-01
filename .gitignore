@@ -1,4 +1,8 @@
 .env
 venv/
 .venv/
+<<<<<<< HEAD
 excel/
+=======
+__pycache__/
+>>>>>>> origin/Login
