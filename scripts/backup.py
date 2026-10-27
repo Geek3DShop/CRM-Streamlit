@@ -2,6 +2,8 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 
+from services.backup_state_service import load_state, save_state
+
 # CAMINHOS
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 
@@ -13,33 +15,78 @@ CRM_FILE = EXCEL_DIR / "CRM.xlsx"
 PROFIT_LOSS_FILE = EXCEL_DIR / "CRM - Profit&Loss.xlsx"
 
 # BACKUP
-def create_backup():
-    if not CRM_FILE.exists():
-        raise FileNotFoundError(
-            f"Tabela não encontrada: {CRM_FILE}"
+def create_backup(backup_type="manual"):
+    
+    if backup_type not in ("manual", "automatic"):
+        raise ValueError(
         )
-
-    if not PROFIT_LOSS_FILE.exists():
-        raise FileNotFoundError(
-            f"Tabela não encontrada: {PROFIT_LOSS_FILE}"
-        )
-
-    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
 
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-    backup_folder = BACKUP_DIR / timestamp
-    backup_folder.mkdir()
+    try:
+        # Verifica se as tabelos existem
+        if not CRM_FILE.exists():
+            raise FileNotFoundError(
+                f"Tabela não encontrada: {CRM_FILE}"
+            )
 
-    shutil.copy2(CRM_FILE, backup_folder / CRM_FILE.name)
-    shutil.copy2(PROFIT_LOSS_FILE, backup_folder / PROFIT_LOSS_FILE.name)
+        if not PROFIT_LOSS_FILE.exists():
+            raise FileNotFoundError(
+                f"Tabela não encontrada: {PROFIT_LOSS_FILE}"
+            )
 
-    return backup_folder
+        # Cria a pasta principal de backups
+        BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+
+        # Cria a pasta deste backup
+        backup_folder = BACKUP_DIR / timestamp
+        backup_folder.mkdir()
+
+        # Copia as duas tabelas
+        shutil.copy2(
+            CRM_FILE,
+            backup_folder / CRM_FILE.name
+        )
+
+        shutil.copy2(
+            PROFIT_LOSS_FILE,
+            backup_folder / PROFIT_LOSS_FILE.name
+        )
+
+        # Registra sucesso
+        state = load_state()
+
+        state["last_successful_backup"] = (
+            datetime.now().isoformat(timespec="seconds")
+        )
+
+        state["last_backup_type"] = backup_type
+
+        # Como o último backup foi bem-sucedido,
+        # limpamos o último erro registrado.
+        state["last_failed_backup"] = None
+        state["last_error"] = None
+
+        save_state(state)
+
+        return backup_folder
+
+    except Exception as error:
+
+        # Registra falha
+        state = load_state()
+
+        state["last_failed_backup"] = (
+            datetime.now().isoformat(timespec="seconds")
+        )
+        state["last_error"] = str(error)
+        save_state(state)
+        raise
 
 # EXECUÇÃO DIRETA
 if __name__ == "__main__":
     try:
-        backup_path = create_backup()
+        backup_path = create_backup("manual")
 
         print("====================================")
         print("BACKUP REALIZADO COM SUCESSO")
