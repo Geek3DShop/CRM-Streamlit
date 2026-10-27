@@ -3,6 +3,7 @@ from datetime import datetime
 import shutil
 
 from services.backup_state_service import load_state, save_state
+from services.backup_history_service import add_backup_record
 
 # CAMINHOS
 PROJECT_DIR = Path(__file__).resolve().parent.parent
@@ -16,15 +17,19 @@ PROFIT_LOSS_FILE = EXCEL_DIR / "CRM - Profit&Loss.xlsx"
 
 # BACKUP
 def create_backup(backup_type="manual"):
-    
     if backup_type not in ("manual", "automatic"):
         raise ValueError(
+            "Tipo de backup inválido. "
+            "Use 'manual' ou 'automatic'."
         )
 
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    now = datetime.now()
+
+    timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
+    backup_date = now.isoformat(timespec="seconds")
 
     try:
-        # Verifica se as tabelos existem
+       # Verifica se as tabelas existem
         if not CRM_FILE.exists():
             raise FileNotFoundError(
                 f"Tabela não encontrada: {CRM_FILE}"
@@ -37,7 +42,7 @@ def create_backup(backup_type="manual"):
 
         # Cria a pasta principal de backups
         BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-
+        
         # Cria a pasta deste backup
         backup_folder = BACKUP_DIR / timestamp
         backup_folder.mkdir()
@@ -53,35 +58,49 @@ def create_backup(backup_type="manual"):
             backup_folder / PROFIT_LOSS_FILE.name
         )
 
-        # Registra sucesso
+        # Registra sucesso no estado
         state = load_state()
 
-        state["last_successful_backup"] = (
-            datetime.now().isoformat(timespec="seconds")
-        )
-
+        state["last_successful_backup"] = backup_date
         state["last_backup_type"] = backup_type
-
-        # Como o último backup foi bem-sucedido,
-        # limpamos o último erro registrado.
         state["last_failed_backup"] = None
         state["last_error"] = None
 
         save_state(state)
+        
+        # Registra sucesso no histórico
+        add_backup_record(
+            backup_type=backup_type,
+            status="success",
+            date=backup_date,
+            location=str(backup_folder),
+            error=None
+        )
 
         return backup_folder
 
     except Exception as error:
 
-        # Registra falha
+        # Registra falha no estado
         state = load_state()
 
-        state["last_failed_backup"] = (
-            datetime.now().isoformat(timespec="seconds")
-        )
+        state["last_failed_backup"] = backup_date
         state["last_error"] = str(error)
+
         save_state(state)
+
+        # Registra falha no histórico
+        add_backup_record(
+            backup_type=backup_type,
+            status="failed",
+            date=backup_date,
+            location=None,
+            error=str(error)
+        )
+
         raise
+
+
 
 # EXECUÇÃO DIRETA
 if __name__ == "__main__":
