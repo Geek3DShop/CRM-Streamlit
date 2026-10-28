@@ -2,3 +2,9 @@
 venv/
 .venv/
 __pycache__/
+# Dados gerados pelo sistema de backups
+config/backup_state.json
+config/backup_history.json
+
+# Backups gerados
+Backups/

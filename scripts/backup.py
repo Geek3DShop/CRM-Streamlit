@@ -24,7 +24,6 @@ def create_backup(backup_type="manual"):
         )
 
     now = datetime.now()
-
     timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
     backup_date = now.isoformat(timespec="seconds")
 
@@ -83,7 +82,6 @@ def create_backup(backup_type="manual"):
 
         # Registra falha no estado
         state = load_state()
-
         state["last_failed_backup"] = backup_date
         state["last_error"] = str(error)
 
@@ -99,8 +97,6 @@ def create_backup(backup_type="manual"):
         )
 
         raise
-
-
 
 # EXECUÇÃO DIRETA
 if __name__ == "__main__":
