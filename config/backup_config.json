@@ -3,7 +3,7 @@
         "enabled": true,
         "frequency": "weekly",
         "day_of_week": "monday",
-        "time": "18:00"
+        "time": "9:20"
     },
     "backup_location": "",
     "reminder": {
