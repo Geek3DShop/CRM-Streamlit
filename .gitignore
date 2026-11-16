@@ -5,6 +5,7 @@ __pycache__/
 # Dados gerados pelo sistema de backups
 config/backup_state.json
 config/backup_history.json
+config/backup_config.json
 
 # Backups gerados
 Backups/
