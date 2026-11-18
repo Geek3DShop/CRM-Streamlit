@@ -4,15 +4,16 @@ import shutil
 
 from services.backup_state_service import load_state, save_state
 from services.backup_history_service import add_backup_record
+from services.backup_config_service import load_config
 
 # CAMINHOS
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 
-EXCEL_DIR = PROJECT_DIR.parent / "Excel"
+EXCEL_DIR = PROJECT_DIR / "excel"
 
-BACKUP_DIR = PROJECT_DIR.parent / "Backups"
+BACKUP_DIR = Path(load_config()["backup_location"])
 
-CRM_FILE = EXCEL_DIR / "CRM.xlsx"
+CRM_FILE = EXCEL_DIR / "CRM - Clientes.xlsx"
 PROFIT_LOSS_FILE = EXCEL_DIR / "CRM - Profit&Loss.xlsx"
 
 # BACKUP
